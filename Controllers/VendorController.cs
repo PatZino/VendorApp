@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CoreDbSpCallMVC.Models;
 using CoreDbSpCallMVC.Models.DB;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace CoreDbSpCallMVC.Controllers
 {
@@ -19,24 +21,29 @@ namespace CoreDbSpCallMVC.Controllers
         #region Display all Vendors
 
         [Obsolete]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
             var allVendors = new List<SpVendors>();
-                
-            try
+			int pageSize = 5;
+			try
             {
 
                 // Settings.  
                 allVendors = await this.databaseManager.GetVendors();
+				var vend = allVendors.AsQueryable();
+				ViewBag.NumberOfPages = repo.GetPages(vend, pageSize);
+				vend = vend.OrderBy(q => q.Name);
 
-            }
-            catch (Exception ex)
+			}
+			catch (Exception ex)
             {
                 // Info  
                 Console.Write(ex);
             }
-            return View(allVendors);
-        }
+			
+			//return View(allVendors);
+			return View(PaginatedList<SpVendors>.Create(allVendors, page ?? 1, pageSize));			
+		}
 
         #endregion
 
@@ -75,14 +82,16 @@ namespace CoreDbSpCallMVC.Controllers
                     // Info  
                     Console.Write(ex);
                 }
-                return View(allVendors);
+                //return View(allVendors);
+                return RedirectToAction("Index");
                 //return RedirectToAction("Index", "Vendor");
                 //return RedirectToAction("Create", "Vendor", new { dis = ViewData["display"] });
             }
             else
             {
-                return View(allVendors);
-            }
+                //return View(allVendors);
+				return RedirectToAction("Index");
+			}
         }
 
         #endregion
@@ -100,7 +109,8 @@ namespace CoreDbSpCallMVC.Controllers
         [Obsolete]
         public async Task<IActionResult> Update(SpVendors spVendors, string Name, int id)
         {
-            var allVendors = new SpVendors();
+			spVendors.VendorId = id;
+			var allVendors = new SpVendors();
            if (string.IsNullOrEmpty(spVendors.Name))
                 ModelState.AddModelError(nameof(spVendors.Name), "Please enter the Vendor's name");
             
@@ -122,12 +132,14 @@ namespace CoreDbSpCallMVC.Controllers
                     // Info  
                     Console.Write(ex);
                 }
-                return View(allVendors);
-            }
+				// return View(allVendors);
+				return RedirectToAction("Index");
+			}
             else
             {
-                return View(allVendors);
-            }
+				// return View(allVendors);
+				return RedirectToAction("Index");
+			}
         }
 
         #endregion
@@ -135,15 +147,15 @@ namespace CoreDbSpCallMVC.Controllers
         #region Delete Vendors
 
         [HttpGet]
-        public IActionResult Delete(SpVendors vendors, int id)
+        public IActionResult Delete(SpVendors vendors, int Vendorid)
         {
-            vendors.VendorId = id;
+            vendors.VendorId = Vendorid;
             return View(vendors);
         }
 
         [HttpPost]
         [Obsolete]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int Vendorid)
         {
             var allVendors = new List<SpVendors>();
 
@@ -151,7 +163,7 @@ namespace CoreDbSpCallMVC.Controllers
             {
 
                 // Settings.  
-                allVendors = await this.databaseManager.DeleteVendor(id);
+                allVendors = await this.databaseManager.DeleteVendor(Vendorid);
 
             }
             catch (Exception ex)

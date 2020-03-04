@@ -22,13 +22,15 @@ namespace CoreDbSpCallMVC
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+		// This method gets called by the runtime. Use this method to add services to the container.
+	
+		public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
             // Register SQL database configuration context as services.    
             services.AddDbContext<db_core_sp_callContext>(options => options.UseSqlServer(Configuration.GetConnectionString("db_core_ef_first")));
-        }
+			
+		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -54,7 +56,7 @@ namespace CoreDbSpCallMVC
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Vendor}/{action=Index}/{id?}");
             });
         }
     }
